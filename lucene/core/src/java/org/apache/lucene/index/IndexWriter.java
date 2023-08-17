@@ -3729,7 +3729,7 @@ public class IndexWriter
         if (anyChanges) {
           maybeMerge.set(true);
         }
-        startCommit(toCommit);
+        startCommit(toCommit); // 会触发fsync
         if (pendingCommit == null) {
           return -1;
         } else {
@@ -5532,7 +5532,7 @@ public class IndexWriter
         final Collection<String> filesToSync;
         try {
           filesToSync = toSync.files(false);
-          directory.sync(filesToSync);
+          directory.sync(filesToSync); // fsync
           success = true;
         } finally {
           if (!success) {

@@ -533,7 +533,7 @@ public abstract class LogMergePolicy extends MergePolicy {
     // precompute the max level on the right side.
     // arr size is numMergeableSegments + 1 to handle the case
     // when numMergeableSegments is 0.
-    float[] maxLevels = new float[numMergeableSegments + 1];
+    float[] maxLevels = new float[numMergeableSegments + 1];// maxLevels[i]代表i及右侧元素的最大值
     // -1 is definitely the minimum value, because Math.log(1) is 0.
     maxLevels[numMergeableSegments] = -1.0f;
     for (int i = numMergeableSegments - 1; i >= 0; i--) {
@@ -562,7 +562,7 @@ public abstract class LogMergePolicy extends MergePolicy {
         levelBottom = (float) (maxLevel - 2 * LEVEL_LOG_SPAN);
       }
 
-      int upto = numMergeableSegments - 1;
+      int upto = numMergeableSegments - 1; // 最右侧level大于levelBottom的元素
       while (upto >= start) {
         if (levels.get(upto).level >= levelBottom) {
           break;
@@ -590,7 +590,7 @@ public abstract class LogMergePolicy extends MergePolicy {
           }
           long segmentSize = size(info, mergeContext);
           long segmentDocs = sizeDocs(info, mergeContext);
-          if (mergeSize + segmentSize > maxMergeSize || mergeDocs + segmentDocs > maxMergeDocs) {
+          if (mergeSize + segmentSize > maxMergeSize || mergeDocs + segmentDocs > maxMergeDocs) { // max merge 限制策略
             // This merge is full, stop adding more segments to it
             if (i == start) {
               // This segment alone is too large, return a singleton merge
@@ -612,7 +612,7 @@ public abstract class LogMergePolicy extends MergePolicy {
         if (anyMerging || end - start <= 1) {
           // skip: there is an ongoing merge at the current level or the computed merge has a single
           // segment and this merge policy doesn't do singleton merges
-        } else {
+        } else { // start和end间的segment保存为one merge
           if (spec == null) {
             spec = new MergeSpecification();
           }

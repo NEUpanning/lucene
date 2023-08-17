@@ -92,7 +92,7 @@ public abstract class TopScoreDocCollector extends TopDocsCollector<ScoreDoc> {
             // with equal score to pqTop.score cannot compete since HitQueue favors
             // documents with lower doc Ids. Therefore reject those docs too.
             return;
-          }
+          }// 替换堆顶元素并调整堆
           pqTop.doc = doc + docBase;
           pqTop.score = score;
           pqTop = pq.updateTop();
@@ -282,7 +282,7 @@ public abstract class TopScoreDocCollector extends TopDocsCollector<ScoreDoc> {
   }
 
   int docBase;
-  ScoreDoc pqTop;
+  ScoreDoc pqTop;// pqTop是pq堆顶元素的引用，可以通过更改pqTop替换堆顶元素
   final HitsThresholdChecker hitsThresholdChecker;
   final MaxScoreAccumulator minScoreAcc;
   float minCompetitiveScore;
