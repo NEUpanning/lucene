@@ -1,0 +1,255 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<topics>
+  <topic>
+    <name>merge scheduler</name>
+    <note>merge scheduler根据merge policy执行merge，默认为ConcurrentMergeScheduler.
+还有其他子类：
+NoMergeScheduler：不执行merge。比如用户在高峰期不想执行merge，那么使用这个
+SerialMergeScheduler:线性执行merge
+ConcurrentMergeScheduler:并发执行merge</note>
+    <updatedAt>2023-08-17 18:38:36</updatedAt>
+    <topicLines>
+      <topicLine>
+        <line>515</line>
+        <inProject>true</inProject>
+        <url>file:///Users/panning/IdeaProjects/lucene8.6.2/lucene/lucene/core/src/java/org/apache/lucene/index/ConcurrentMergeScheduler.java</url>
+        <note>indexwriter触发merge，原因有多种见MergeTrigger</note>
+        <relativePath>lucene/core/src/java/org/apache/lucene/index/ConcurrentMergeScheduler.java</relativePath>
+      </topicLine>
+      <topicLine>
+        <line>558</line>
+        <inProject>true</inProject>
+        <url>file:///Users/panning/IdeaProjects/lucene8.6.2/lucene/lucene/core/src/java/org/apache/lucene/index/ConcurrentMergeScheduler.java</url>
+        <note>根据merge执行情况调整IO限流大小</note>
+        <relativePath>lucene/core/src/java/org/apache/lucene/index/ConcurrentMergeScheduler.java</relativePath>
+      </topicLine>
+      <topicLine>
+        <line>823</line>
+        <inProject>true</inProject>
+        <url>file:///Users/panning/IdeaProjects/lucene8.6.2/lucene/lucene/core/src/java/org/apache/lucene/index/ConcurrentMergeScheduler.java</url>
+        <note>若新的是被阻塞了,那么整体提速20%, 加快合并速度</note>
+        <relativePath>lucene/core/src/java/org/apache/lucene/index/ConcurrentMergeScheduler.java</relativePath>
+      </topicLine>
+      <topicLine>
+        <line>845</line>
+        <inProject>true</inProject>
+        <url>file:///Users/panning/IdeaProjects/lucene8.6.2/lucene/lucene/core/src/java/org/apache/lucene/index/ConcurrentMergeScheduler.java</url>
+        <note>若正在进行的merge被阻塞了，则不变</note>
+        <relativePath>lucene/core/src/java/org/apache/lucene/index/ConcurrentMergeScheduler.java</relativePath>
+      </topicLine>
+      <topicLine>
+        <line>854</line>
+        <inProject>true</inProject>
+        <url>file:///Users/panning/IdeaProjects/lucene8.6.2/lucene/lucene/core/src/java/org/apache/lucene/index/ConcurrentMergeScheduler.java</url>
+        <note>若新合并和正在进行的都没有问题, 那么没必要维持该合并速度，降速10%</note>
+        <relativePath>lucene/core/src/java/org/apache/lucene/index/ConcurrentMergeScheduler.java</relativePath>
+      </topicLine>
+      <topicLine>
+        <line>564</line>
+        <inProject>true</inProject>
+        <url>file:///Users/panning/IdeaProjects/lucene8.6.2/lucene/lucene/core/src/java/org/apache/lucene/index/ConcurrentMergeScheduler.java</url>
+        <note>启动merge thread</note>
+        <relativePath>lucene/core/src/java/org/apache/lucene/index/ConcurrentMergeScheduler.java</relativePath>
+      </topicLine>
+      <topicLine>
+        <line>565</line>
+        <inProject>true</inProject>
+        <url>file:///Users/panning/IdeaProjects/lucene8.6.2/lucene/lucene/core/src/java/org/apache/lucene/index/ConcurrentMergeScheduler.java</url>
+        <note>更新merge thread列表，暂停超出线程数的较大的merge thread,更新其他merge thread的限速</note>
+        <relativePath>lucene/core/src/java/org/apache/lucene/index/ConcurrentMergeScheduler.java</relativePath>
+      </topicLine>
+    </topicLines>
+  </topic>
+  <topic>
+    <name>TieredMergePolicy</name>
+    <note>TieredMergePolicy中会先对IndexWriter提供的段集进行排序，然后在排序后的段集中选取部分（可能不连续）段来生成一个待合并段集，即非相邻的段文件（Non-adjacent Segment）。
+
+合并的目的有两个一是减少段数量，而是清理被删除的doc，成本取决于段的大小。TieredMergePolicy根据合并ROI来决定合并策略结果，
+例如通过maxMergedSegmentBytes*50%配置过滤大段（成本高），deletesPctAllowed配置过滤删除较少的段（收益低），allowedSegCount &amp;&amp; allowedDelCount配置限制合并创建（收益低）
+
+https://blog.mikemccandless.com/2011/02/visualizing-lucenes-segment-merges.html</note>
+    <updatedAt>2023-08-16 14:35:01</updatedAt>
+    <topicLines>
+      <topicLine>
+        <line>316</line>
+        <inProject>true</inProject>
+        <url>file:///Users/panning/IdeaProjects/lucene8.6.2/lucene/lucene/core/src/java/org/apache/lucene/index/TieredMergePolicy.java</url>
+        <note>获取merge policy入口</note>
+        <relativePath>lucene/core/src/java/org/apache/lucene/index/TieredMergePolicy.java</relativePath>
+      </topicLine>
+      <topicLine>
+        <line>328</line>
+        <inProject>true</inProject>
+        <url>file:///Users/panning/IdeaProjects/lucene8.6.2/lucene/lucene/core/src/java/org/apache/lucene/index/TieredMergePolicy.java</url>
+        <note>段排序</note>
+        <relativePath>lucene/core/src/java/org/apache/lucene/index/TieredMergePolicy.java</relativePath>
+      </topicLine>
+      <topicLine>
+        <line>330</line>
+        <inProject>true</inProject>
+        <url>file:///Users/panning/IdeaProjects/lucene8.6.2/lucene/lucene/core/src/java/org/apache/lucene/index/TieredMergePolicy.java</url>
+        <note>过滤正在merge的段并计算统计信息</note>
+        <relativePath>lucene/core/src/java/org/apache/lucene/index/TieredMergePolicy.java</relativePath>
+      </topicLine>
+      <topicLine>
+        <line>379</line>
+        <inProject>true</inProject>
+        <url>file:///Users/panning/IdeaProjects/lucene8.6.2/lucene/lucene/core/src/java/org/apache/lucene/index/TieredMergePolicy.java</url>
+        <note>在两种情况下从考虑中删除大于 maxSegSize 的 50% 的大段。 
+1&gt; 删除文档的总体百分比相对较小
+2&gt; 删除文档的该段百分比相对较小
+
+删除的文档越多，merge的收益越大</note>
+        <relativePath>lucene/core/src/java/org/apache/lucene/index/TieredMergePolicy.java</relativePath>
+      </topicLine>
+      <topicLine>
+        <line>396</line>
+        <inProject>true</inProject>
+        <url>file:///Users/panning/IdeaProjects/lucene8.6.2/lucene/lucene/core/src/java/org/apache/lucene/index/TieredMergePolicy.java</url>
+        <note>计算该段集内应该有多少个段，以段大小较相近为标准</note>
+        <relativePath>lucene/core/src/java/org/apache/lucene/index/TieredMergePolicy.java</relativePath>
+      </topicLine>
+      <topicLine>
+        <line>423</line>
+        <inProject>true</inProject>
+        <url>file:///Users/panning/IdeaProjects/lucene8.6.2/lucene/lucene/core/src/java/org/apache/lucene/index/TieredMergePolicy.java</url>
+        <note>前期数据处理完成，进行one merge的获取</note>
+        <relativePath>lucene/core/src/java/org/apache/lucene/index/TieredMergePolicy.java</relativePath>
+      </topicLine>
+      <topicLine>
+        <line>480</line>
+        <inProject>true</inProject>
+        <url>file:///Users/panning/IdeaProjects/lucene8.6.2/lucene/lucene/core/src/java/org/apache/lucene/index/TieredMergePolicy.java</url>
+        <note>删除不可选的段，不可选的段是正在被合并或者已经被选择去合并了</note>
+        <relativePath>lucene/core/src/java/org/apache/lucene/index/TieredMergePolicy.java</relativePath>
+      </topicLine>
+      <topicLine>
+        <line>504</line>
+        <inProject>true</inProject>
+        <url>file:///Users/panning/IdeaProjects/lucene8.6.2/lucene/lucene/core/src/java/org/apache/lucene/index/TieredMergePolicy.java</url>
+        <note>剩余段集无法得到one merge了，返回结果</note>
+        <relativePath>lucene/core/src/java/org/apache/lucene/index/TieredMergePolicy.java</relativePath>
+      </topicLine>
+      <topicLine>
+        <line>527</line>
+        <inProject>true</inProject>
+        <url>file:///Users/panning/IdeaProjects/lucene8.6.2/lucene/lucene/core/src/java/org/apache/lucene/index/TieredMergePolicy.java</url>
+        <note>顺序遍历段集，找一个最接近maxMergedSegmentBytes的 one merge</note>
+        <relativePath>lucene/core/src/java/org/apache/lucene/index/TieredMergePolicy.java</relativePath>
+      </topicLine>
+      <topicLine>
+        <line>557</line>
+        <inProject>true</inProject>
+        <url>file:///Users/panning/IdeaProjects/lucene8.6.2/lucene/lucene/core/src/java/org/apache/lucene/index/TieredMergePolicy.java</url>
+        <note>过滤将一个大段合并成一个更大一点点的段，并且删除的doc也很少情况的one merge</note>
+        <relativePath>lucene/core/src/java/org/apache/lucene/index/TieredMergePolicy.java</relativePath>
+      </topicLine>
+      <topicLine>
+        <line>586</line>
+        <inProject>true</inProject>
+        <url>file:///Users/panning/IdeaProjects/lucene8.6.2/lucene/lucene/core/src/java/org/apache/lucene/index/TieredMergePolicy.java</url>
+        <note>计算当前One merge的评分</note>
+        <relativePath>lucene/core/src/java/org/apache/lucene/index/TieredMergePolicy.java</relativePath>
+      </topicLine>
+      <topicLine>
+        <line>652</line>
+        <inProject>true</inProject>
+        <url>file:///Users/panning/IdeaProjects/lucene8.6.2/lucene/lucene/core/src/java/org/apache/lucene/index/TieredMergePolicy.java</url>
+        <note>根据以下三点计算score
+1. skew：onemerge中seg size的倾斜程度。占比较大
+2. totAfterMergeBytes：onemerge中段大小之和。占比较小
+3. nonDelRatio：OneMerge中所有段包含被删除文档比例。占比较大</note>
+        <relativePath>lucene/core/src/java/org/apache/lucene/index/TieredMergePolicy.java</relativePath>
+      </topicLine>
+      <topicLine>
+        <line>603</line>
+        <inProject>true</inProject>
+        <url>file:///Users/panning/IdeaProjects/lucene8.6.2/lucene/lucene/core/src/java/org/apache/lucene/index/TieredMergePolicy.java</url>
+        <note>替换score最小的onemerge，找到当前轮次评分最低（最好）的onemerge</note>
+        <relativePath>lucene/core/src/java/org/apache/lucene/index/TieredMergePolicy.java</relativePath>
+      </topicLine>
+      <topicLine>
+        <line>629</line>
+        <inProject>true</inProject>
+        <url>file:///Users/panning/IdeaProjects/lucene8.6.2/lucene/lucene/core/src/java/org/apache/lucene/index/TieredMergePolicy.java</url>
+        <note>best one merge加入结果，并从段集删除</note>
+        <relativePath>lucene/core/src/java/org/apache/lucene/index/TieredMergePolicy.java</relativePath>
+      </topicLine>
+      <topicLine>
+        <line>611</line>
+        <inProject>true</inProject>
+        <url>file:///Users/panning/IdeaProjects/lucene8.6.2/lucene/lucene/core/src/java/org/apache/lucene/index/TieredMergePolicy.java</url>
+        <note>找不出onemerge了，返回结果</note>
+        <relativePath>lucene/core/src/java/org/apache/lucene/index/TieredMergePolicy.java</relativePath>
+      </topicLine>
+    </topicLines>
+  </topic>
+  <topic>
+    <name>LogMergePolicy</name>
+    <note>某次提交(commit)或者刷新(flush)的所有索引文件属于一个新的段（Segment），所以也可以称为段合并(Segment Merge)。
+
+段合并的结果是要形成一个指数阶梯，阶梯的宽度一次合并的段数=merge factor,阶梯的高度是段大小=mini segment size * (merge factor ^ level num)
+
+当IndexWriter索引中的数据有任意修改动作，它会调用findMerges(...)方法通过某个合并策略(MergePolicy)来找出需要合并的段集，
+如果需要合并，那么合并策略会返回一个oneMerge的集合，oneMerge的个数描述了IndexWriter需要执行合并的次数，单个oneMerge中包含了需要合并为一个新段(New Segment)的段集合。
+
+LogMergePolicy尝试将相邻的段（Adjacent Segment）合并成多个大小（segment total doc count或者segment total bytes，取决于实现类）指数级（类名中的log即指数含义）增长的层级，每一层级的segment数量少于merge factor</note>
+    <updatedAt>2023-08-16 10:15:14</updatedAt>
+    <topicLines>
+      <topicLine>
+        <line>471</line>
+        <inProject>true</inProject>
+        <url>file:///Users/panning/IdeaProjects/lucene8.6.2/lucene/lucene/core/src/java/org/apache/lucene/index/LogMergePolicy.java</url>
+        <note>当IndexWriter对索引有任意的更改都会调用获取合并策略
+MergeTrigger为触发原因
+SegmentInfos为一组段的抽象</note>
+        <relativePath>lucene/core/src/java/org/apache/lucene/index/LogMergePolicy.java</relativePath>
+      </topicLine>
+      <topicLine>
+        <line>486</line>
+        <inProject>true</inProject>
+        <url>file:///Users/panning/IdeaProjects/lucene8.6.2/lucene/lucene/core/src/java/org/apache/lucene/index/LogMergePolicy.java</url>
+        <note>根据每个segment的total bytes或doc count和merge factor计算log值：log(segment size)/log(merge factor).
+原因是分层时需要确定bottomlevel=maxlevel-LEVEL_LOG_SPAN，这样LEVEL_LOG_SPAN可以确定为定值</note>
+        <relativePath>lucene/core/src/java/org/apache/lucene/index/LogMergePolicy.java</relativePath>
+      </topicLine>
+      <topicLine>
+        <line>543</line>
+        <inProject>true</inProject>
+        <url>file:///Users/panning/IdeaProjects/lucene8.6.2/lucene/lucene/core/src/java/org/apache/lucene/index/LogMergePolicy.java</url>
+        <note>计算各个level，生成onemerge.
+具体策略：
+从左往右遍历
+1. 计算从当前元素(start)到最右侧元素的最大log size，即maxlevel
+2. 计算levelBottom=maxleve - LEVEL_LOG_SPAN
+3. 从右往左遍历，找到第一个log size大于levelBottom，即upto。start到upto为一个level
+4. 从start 到 start+mergeFactor(即end)为一个 one merge。start=end再找出下一个one merge，直到无法获得mergeFactor大小的one merge
+5. start=upto+1，从第一步继续之前的步骤</note>
+        <relativePath>lucene/core/src/java/org/apache/lucene/index/LogMergePolicy.java</relativePath>
+      </topicLine>
+      <topicLine>
+        <line>592</line>
+        <inProject>true</inProject>
+        <url>file:///Users/panning/IdeaProjects/lucene8.6.2/lucene/lucene/core/src/java/org/apache/lucene/index/LogMergePolicy.java</url>
+        <note>max merge的大小 限制策略</note>
+        <relativePath>lucene/core/src/java/org/apache/lucene/index/LogMergePolicy.java</relativePath>
+      </topicLine>
+      <topicLine>
+        <line>611</line>
+        <inProject>true</inProject>
+        <url>file:///Users/panning/IdeaProjects/lucene8.6.2/lucene/lucene/core/src/java/org/apache/lucene/index/LogMergePolicy.java</url>
+        <note>跳过正在进行merge的segment。
+只有一个segment不进行merge</note>
+        <relativePath>lucene/core/src/java/org/apache/lucene/index/LogMergePolicy.java</relativePath>
+      </topicLine>
+      <topicLine>
+        <line>618</line>
+        <inProject>true</inProject>
+        <url>file:///Users/panning/IdeaProjects/lucene8.6.2/lucene/lucene/core/src/java/org/apache/lucene/index/LogMergePolicy.java</url>
+        <note>构建one merge</note>
+        <relativePath>lucene/core/src/java/org/apache/lucene/index/LogMergePolicy.java</relativePath>
+      </topicLine>
+    </topicLines>
+  </topic>
+</topics>
+

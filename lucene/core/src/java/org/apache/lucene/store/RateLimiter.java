@@ -110,7 +110,7 @@ public abstract class RateLimiter {
         // maybe we should also offer decayed recent history one?
         targetNS = lastNS + (long) (1000000000 * secondsToPause);
 
-        if (startNS >= targetNS) {
+        if (startNS >= targetNS) { // 已经度过暂停的时间了，直接返回
           // OK, current time is already beyond the target sleep time,
           // no pausing to do.
 
@@ -154,7 +154,7 @@ public abstract class RateLimiter {
         break;
       }
 
-      return curNS - startNS;
+      return curNS - startNS; // 实际pause时间
     }
   }
 }

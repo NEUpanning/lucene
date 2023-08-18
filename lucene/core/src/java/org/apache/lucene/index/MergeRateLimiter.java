@@ -82,7 +82,7 @@ public class MergeRateLimiter extends RateLimiter {
   }
 
   @Override
-  public long pause(long bytes) throws MergePolicy.MergeAbortedException {
+  public long pause(long bytes) throws MergePolicy.MergeAbortedException {// bytes是过去一段时间写入的字节数
     totalBytesWritten.addAndGet(bytes);
 
     // While loop because we may wake up and check again when our rate limit
@@ -119,14 +119,14 @@ public class MergeRateLimiter extends RateLimiter {
     }
 
     double rate = mbPerSec; // read from volatile rate once.
-    double secondsToPause = (bytes / 1024. / 1024.) / rate;
+    double secondsToPause = (bytes / 1024. / 1024.) / rate;// 根据限速写bytes需要的时间
 
     // Time we should sleep until; this is purely instantaneous
     // rate (just adds seconds onto the last time we had paused to);
     // maybe we should also offer decayed recent history one?
-    long targetNS = lastNS + (long) (1000000000 * secondsToPause);
+    long targetNS = lastNS + (long) (1000000000 * secondsToPause); // 根据限速写bytes应该结束的时间
 
-    long curPauseNS = targetNS - curNS;
+    long curPauseNS = targetNS - curNS;// 根据当前时间计算出还应该暂停多久
 
     // We don't bother with thread pausing if the pause is smaller than 2 msec.
     if (curPauseNS <= MIN_PAUSE_NS) {
@@ -144,7 +144,7 @@ public class MergeRateLimiter extends RateLimiter {
 
     long start = System.nanoTime();
     try {
-      mergeProgress.pauseNanos(
+      mergeProgress.pauseNanos(// 执行pause
           curPauseNS,
           rate == 0.0 ? PauseReason.STOPPED : PauseReason.PAUSED,
           () -> rate == mbPerSec);

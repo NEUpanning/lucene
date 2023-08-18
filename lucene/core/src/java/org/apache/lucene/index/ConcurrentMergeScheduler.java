@@ -77,11 +77,11 @@ public class ConcurrentMergeScheduler extends MergeScheduler {
   // ones run, up until maxMergeCount merges at which point
   // we forcefully pause incoming threads (that presumably
   // are the ones causing so much merging).
-  private int maxThreadCount = AUTO_DETECT_MERGES_AND_THREADS;
+  private int maxThreadCount = AUTO_DETECT_MERGES_AND_THREADS; // 合并线程的同时执行（I/O）节流
 
   // Max number of merges we accept before forcefully
   // throttling the incoming threads
-  private int maxMergeCount = AUTO_DETECT_MERGES_AND_THREADS;
+  private int maxMergeCount = AUTO_DETECT_MERGES_AND_THREADS; // 合并线程的生成节流
 
   /** How many {@link MergeThread}s have kicked off (this is use to name them). */
   protected int mergeThreadCount;
@@ -304,7 +304,7 @@ public class ConcurrentMergeScheduler extends MergeScheduler {
     final List<MergeThread> activeMerges = new ArrayList<>();
 
     int threadIdx = 0;
-    while (threadIdx < mergeThreads.size()) {
+    while (threadIdx < mergeThreads.size()) { // 找出active merge thread，并更新mergeThreads
       final MergeThread mergeThread = mergeThreads.get(threadIdx);
       if (!mergeThread.isAlive()) {
         // Prune any dead threads
@@ -351,10 +351,10 @@ public class ConcurrentMergeScheduler extends MergeScheduler {
       OneMerge merge = mergeThread.merge;
 
       // pause the thread if maxThreadCount is smaller than the number of merge threads.
-      final boolean doPause = threadIdx < bigMergeCount - maxThreadCount;
+      final boolean doPause = threadIdx < bigMergeCount - maxThreadCount; // 小的one merge不会暂停,停止大小前bigMergeCount - maxThreadCount的merge thread
 
-      double newMBPerSec;
-      if (doPause) {
+      double newMBPerSec; // 当前merge thread新的限速大小
+      if (doPause) {// 需要暂停，那么限速为0
         newMBPerSec = 0.0;
       } else if (merge.maxNumSegments != -1) {
         newMBPerSec = forceMergeMBPerSec;
@@ -364,7 +364,7 @@ public class ConcurrentMergeScheduler extends MergeScheduler {
         // Don't rate limit small merges:
         newMBPerSec = Double.POSITIVE_INFINITY;
       } else {
-        newMBPerSec = targetMBPerSec;
+        newMBPerSec = targetMBPerSec;// 非特殊情况，限速为targetMBPerSec，即之前计算的限速大小
       }
 
       MergeRateLimiter rateLimiter = mergeThread.rateLimiter;
@@ -541,7 +541,7 @@ public class ConcurrentMergeScheduler extends MergeScheduler {
         break;
       }
 
-      OneMerge merge = mergeSource.getNextMerge();
+      OneMerge merge = mergeSource.getNextMerge(); // 获取one merge
       if (merge == null) {
         if (verbose()) {
           message("  no more merges pending; now return");
@@ -553,10 +553,10 @@ public class ConcurrentMergeScheduler extends MergeScheduler {
       try {
         // OK to spawn a new merge thread to handle this
         // merge:
-        final MergeThread newMergeThread = getMergeThread(mergeSource, merge);
+        final MergeThread newMergeThread = getMergeThread(mergeSource, merge);// 实例化merge thread
         mergeThreads.add(newMergeThread);
 
-        updateIOThrottle(newMergeThread.merge, newMergeThread.rateLimiter);
+        updateIOThrottle(newMergeThread.merge, newMergeThread.rateLimiter); // 根据merge执行情况调整IO限流大小
 
         if (verbose()) {
           message("    launch new thread [" + newMergeThread.getName() + "]");
@@ -584,9 +584,9 @@ public class ConcurrentMergeScheduler extends MergeScheduler {
    * <p>If this method wants to stall but the calling thread is a merge thread, it should return
    * false to tell caller not to kick off any new merges.
    */
-  protected synchronized boolean maybeStall(MergeSource mergeSource) {
+  protected synchronized boolean maybeStall(MergeSource mergeSource) { // 判断是否需要执行merge thread的生成节流
     long startStallTime = 0;
-    while (mergeSource.hasPendingMerges() && mergeThreadCount() >= maxMergeCount) {
+    while (mergeSource.hasPendingMerges() && mergeThreadCount() >= maxMergeCount) {// 存在未执行的one merge并且执行合并的线程数达到最大maxMergeCount，意味着merge速度远远落后
 
       // This means merging has fallen too far behind: we
       // have already created maxMergeCount threads, and
@@ -598,7 +598,7 @@ public class ConcurrentMergeScheduler extends MergeScheduler {
       // thread to prevent creation of new segments,
       // until merging has caught up:
 
-      if (mergeThreads.contains(Thread.currentThread())) {
+      if (mergeThreads.contains(Thread.currentThread())) {// 调用线程是merge线程
         // Never stall a merge thread since this blocks the thread from
         // finishing and calling updateMergeThreads, and blocking it
         // accomplishes nothing anyway (it's not really a segment producer):
@@ -611,7 +611,7 @@ public class ConcurrentMergeScheduler extends MergeScheduler {
           message("    too many merges; stalling...");
         }
       }
-      doStall();
+      doStall(); // 暂停当前线程
     }
 
     if (verbose() && startStallTime != 0) {
@@ -766,9 +766,9 @@ public class ConcurrentMergeScheduler extends MergeScheduler {
     double mergeMB = bytesToMB(merge.estimatedMergeBytes);
     for (MergeThread mergeThread : mergeThreads) {
       long mergeStartNS = mergeThread.merge.mergeStartNS;
-      if (mergeThread.isAlive()
-          && mergeThread.merge != merge
-          && mergeStartNS != -1
+      if (mergeThread.isAlive()// merge线程存活
+          && mergeThread.merge != merge // 和传参不是一个one merge
+          && mergeStartNS != -1 // merge开始了
           && mergeThread.merge.estimatedMergeBytes >= MIN_BIG_MERGE_MB * 1024 * 1024
           && nsToSec(now - mergeStartNS) > 3.0) {
         double otherMergeMB = bytesToMB(mergeThread.merge.estimatedMergeBytes);
@@ -790,7 +790,7 @@ public class ConcurrentMergeScheduler extends MergeScheduler {
     }
 
     double mergeMB = bytesToMB(newMerge.estimatedMergeBytes);
-    if (mergeMB < MIN_BIG_MERGE_MB) {
+    if (mergeMB < MIN_BIG_MERGE_MB) { // 较小的merge不进行IO限流
       // Only watch non-trivial merges for throttling; this is safe because the MP must eventually
       // have to do larger merges:
       return;
@@ -801,16 +801,16 @@ public class ConcurrentMergeScheduler extends MergeScheduler {
     // Simplistic closed-loop feedback control: if we find any other similarly
     // sized merges running, then we are falling behind, so we bump up the
     // IO throttle, else we lower it:
-    boolean newBacklog = isBacklog(now, newMerge);
+    boolean newBacklog = isBacklog(now, newMerge); // 如果存在level差不多（大小范围30%~300%）正在进行的one merge，意味着one merge落后了需要增加IO限流大小
 
-    boolean curBacklog = false;
+    boolean curBacklog = false; // 检查存在的合并是否被限流（pause）了
 
     if (newBacklog == false) {
-      if (mergeThreads.size() > maxThreadCount) {
+      if (mergeThreads.size() > maxThreadCount) {// 若正在merge的线程个数超过maxThreadCount限制，说明已经有线程被限流了
         // If there are already more than the maximum merge threads allowed, count that as backlog:
         curBacklog = true;
       } else {
-        // Now see if any still-running merges are backlog'd:
+        // Now see if any still-running merges are backlog'd: // 当前merge线程中有相近level的merge
         for (MergeThread mergeThread : mergeThreads) {
           if (isBacklog(now, mergeThread.merge)) {
             curBacklog = true;
@@ -821,7 +821,7 @@ public class ConcurrentMergeScheduler extends MergeScheduler {
     }
 
     double curMBPerSec = targetMBPerSec;
-
+    // 若新的是被阻塞了,那么整体提速20%, 加快合并速度
     if (newBacklog) {
       // This new merge adds to the backlog: increase IO throttle by 20%
       targetMBPerSec *= 1.20;
@@ -843,7 +843,7 @@ public class ConcurrentMergeScheduler extends MergeScheduler {
                   targetMBPerSec));
         }
       }
-    } else if (curBacklog) {
+    } else if (curBacklog) {// 若正在进行的merge被阻塞了，则不变
       // We still have an existing backlog; leave the rate as is:
       if (verbose()) {
         message(
@@ -852,7 +852,7 @@ public class ConcurrentMergeScheduler extends MergeScheduler {
                 "io throttle: current merge backlog; leave IO rate at %.1f MB/sec",
                 targetMBPerSec));
       }
-    } else {
+    } else {// 若新合并和正在进行的都没有问题, 那么没必要维持该合并速度，降速10%
       // We are not falling behind: decrease IO throttle by 10%
       targetMBPerSec /= 1.10;
       if (targetMBPerSec < MIN_MERGE_MB_PER_SEC) {
