@@ -320,7 +320,7 @@ public class ConcurrentMergeScheduler extends MergeScheduler {
 
     final int activeMergeCount = activeMerges.size();
 
-    int bigMergeCount = 0;
+    int bigMergeCount = 0; // merge大小大于MIN_BIG_MERGE_MB的数量
 
     for (threadIdx = activeMergeCount - 1; threadIdx >= 0; threadIdx--) {
       MergeThread mergeThread = activeMerges.get(threadIdx);

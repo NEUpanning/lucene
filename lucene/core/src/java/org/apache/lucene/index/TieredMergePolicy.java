@@ -504,7 +504,7 @@ public class TieredMergePolicy extends MergePolicy {
       final int remainingDelCount = sortedEligible.stream().mapToInt(c -> c.delCount).sum();
       if (mergeType == MERGE_TYPE.NATURAL// 剩余段集无法得到one merge了，返回结果
           && sortedEligible.size() <= allowedSegCount // 说明剩余的段数量很少了，merge收益不大
-          && remainingDelCount <= allowedDelCount) { // 说明剩余的段要删除的doc较少，merge收益不大
+          && remainingDelCount <= allowedDelCount) { // 说明剩余的段要删除的doc较少，merge收益不大（当剩余段较少但删除doc很多时也会执行merge，为了让doc被删除掉）
         return spec;
       }
 
@@ -678,7 +678,7 @@ public class TieredMergePolicy extends MergePolicy {
       // "cascade" and so it cannot lead to N^2 merge cost
       // over time:
       final int mergeFactor = (int) Math.min(maxMergeAtOnce, segsPerTier);
-      skew = 1.0 / mergeFactor; // 视为倾斜程度最小（也就是最好），不知道为啥要这样
+      skew = 1.0 / mergeFactor; // 视为倾斜程度最小（也就是最好），可能是因为这些段很接近最大大小后面基本不会再参与merge，所以成本比较低，如果onemerge大小较小merge后的段很可能还会继续参加merge（也就是注释说的"cascade"）
     } else {
       skew =
           ((double) floorSize(segmentsSizes.get(candidate.get(0)).sizeInBytes))
